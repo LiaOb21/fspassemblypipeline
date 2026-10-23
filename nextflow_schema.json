@@ -325,7 +325,8 @@
             "type": "string"
         },
         "busco_clean_intermediates": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": true
         },
         "busco_extra_args": {
             "type": "string",
