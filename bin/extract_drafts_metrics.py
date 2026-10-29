@@ -188,7 +188,6 @@ def main():
     parser.add_argument('--reads-type',           required=True)
     parser.add_argument('--kmer-strategy',        required=True)
     parser.add_argument('--assembler',            required=True)
-    parser.add_argument('--polisher',             default='pypolca')
     parser.add_argument('--busco-general',        required=True)
     parser.add_argument('--busco-specific',       required=True)
     parser.add_argument('--quast-tsv',            required=True)
@@ -216,7 +215,6 @@ def main():
         'reads_type':       args.reads_type,
         'kmer_strategy':    args.kmer_strategy,
         'assembler':        args.assembler,
-        'polisher':         args.polisher,
         'lineage_general':  lineage_general,
         'lineage_specific': lineage_specific,
     }

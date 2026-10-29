@@ -27,7 +27,6 @@ process EXTRACTDRAFTMETRICS {
         --reads-type ${meta.reads_type} \\
         --kmer-strategy ${meta.kmer_strategy} \\
         --assembler ${meta.assembler} \\
-        --polisher pypolca \\
         --busco-general ${busco_general} \\
         --busco-specific ${busco_specific} \\
         --quast-tsv ${quast_results}/transposed_report.tsv \\
