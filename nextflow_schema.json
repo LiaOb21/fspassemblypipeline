@@ -453,6 +453,9 @@
         "min_contig_size": {
             "type": "integer",
             "default": 1000
+        },
+        "kmergenie_extra_args": {
+            "type": "string"
         }
     }
 }
