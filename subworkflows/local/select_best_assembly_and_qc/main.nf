@@ -19,6 +19,7 @@ include { SAMTOOLS_COVERAGE                                } from '../../../modu
 include { SAMTOOLS_FLAGSTAT                                } from '../../../modules/nf-core/samtools/flagstat/main'
 include { COVERAGEVIZ                                      } from '../../../modules/local/coverageviz/main'
 include { EXTRACTASSEMBLYMETRICS                           } from '../../../modules/local/extractassemblymetrics/main'
+include {lineageDb                                         } from '../utils_nfcore_fspassemblypipeline_pipeline/main'
 
 workflow SELECT_BEST_ASSEMBLY_AND_QC {
 
@@ -41,7 +42,14 @@ workflow SELECT_BEST_ASSEMBLY_AND_QC {
 
     RENAME_ASSEMBLIES ( ch_draft_assemblies_input )
 
-    BUSCO_BUSCO ( RENAME_ASSEMBLIES.out.renamed_assemblies, params.busco_mode, params.busco_lineage, params.busco_lineages_path ?:[], params.busco_config_file ?:[], params.busco_clean_intermediates )
+    BUSCO_BUSCO (
+        RENAME_ASSEMBLIES.out.renamed_assemblies,
+        params.busco_mode,
+        params.busco_lineage,
+        lineageDb(params.busco_by_lineage_dir, params.busco_lineage),              // CHANGED
+        params.busco_config_file ?:[],
+        params.busco_clean_intermediates
+    )
 
     // Map samples to their best BUSCO database based on taxonomy
     // BUSCO_SPECIFIC runs BUSCO with a specific lineage for each sample. The lineage is determined based on the sample metadata and the list of available lineages.
@@ -79,6 +87,7 @@ workflow SELECT_BEST_ASSEMBLY_AND_QC {
         .multiMap { meta, assembly, lineage ->
             assemblies: tuple(meta, assembly)
             lineages: lineage
+            dbs: lineageDb(params.busco_by_lineage_dir, lineage)            // NEW
         }
 
     // Specific BUSCO with per-sample lineage
@@ -86,7 +95,7 @@ workflow SELECT_BEST_ASSEMBLY_AND_QC {
         ch_assemblies_with_lineage.assemblies,
         params.busco_mode,
         ch_assemblies_with_lineage.lineages,
-        params.busco_lineages_path ?: [],
+        ch_assemblies_with_lineage.dbs,                // CHANGED
         params.busco_config_file ?: [],
         params.busco_clean_intermediates
     )
@@ -203,7 +212,13 @@ workflow SELECT_BEST_ASSEMBLY_AND_QC {
 
     // Run BUSCO on the polished best assembly using the general lineage specified by params.busco_lineage and then run BUSCO with the specific lineage determined for each sample based on its metadata.
 
-    BUSCO_FINAL ( PYPOLCA_RUN.out.polished, params.busco_mode, params.busco_lineage, params.busco_lineages_path ?:[], params.busco_config_file ?:[], params.busco_clean_intermediates )
+    BUSCO_FINAL (
+        PYPOLCA_RUN.out.polished,
+        params.busco_mode,
+        params.busco_lineage,
+        lineageDb(params.busco_by_lineage_dir, params.busco_lineage),              // CHANGED
+        params.busco_config_file ?:[],
+        params.busco_clean_intermediates )
 
     // Add lineage to each sample and split into synchronized channels
     ch_best_assembly_with_lineage = PYPOLCA_RUN.out.polished
@@ -227,13 +242,14 @@ workflow SELECT_BEST_ASSEMBLY_AND_QC {
         .multiMap { meta, assembly, lineage ->
             assembly: tuple(meta, assembly)
             lineages: lineage
+            dbs: lineageDb(params.busco_by_lineage_dir, lineage)              // NEW
         }
 
     BUSCO_SPECIFIC_FINAL(
         ch_best_assembly_with_lineage.assembly,
         params.busco_mode,
         ch_best_assembly_with_lineage.lineages,
-        params.busco_lineages_path ?: [],
+        ch_best_assembly_with_lineage.dbs,             // CHANGED
         params.busco_config_file ?: [],
         params.busco_clean_intermediates
     )

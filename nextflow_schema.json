@@ -456,6 +456,9 @@
         },
         "kmergenie_extra_args": {
             "type": "string"
+        },
+        "busco_by_lineage_dir": {
+            "type": "string"
         }
     }
 }

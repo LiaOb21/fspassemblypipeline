@@ -185,6 +185,11 @@ workflow PIPELINE_COMPLETION {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// NEW: returns the single-lineage db folder: <busco_by_lineage_dir>/<lineage>/lineages/<lineage>
+def lineageDb(dir, lineage) {
+    file("${dir}/${lineage}", checkIfExists: true)
+}
+
 // Add assembler name to meta.id for all assemblies to avoid conflicts in downstream processes that use meta.id for naming outputs (e.g. busco, quast, merquryfk)
 def createAssemblyMeta (meta, assembly, assembler) {
     def strategy = meta.kmer_strategy
